@@ -1,47 +1,20 @@
-const { 
-  graphql, GraphQLString, GraphQLList, GraphQLObjectType, 
-  GraphQLNonNull, GraphQLSchema, GraphQLID 
+const {
+  graphql,
+  GraphQLString,
+  GraphQLList,
+  GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLSchema,
+  GraphQLID,
 } = require("graphql");
 const _ = require("lodash");
+const axios = require("axios");
 
-const { countries } = require("./country");
+const CountryType = require("./country");
+const AuthorType = require("./author");
+const PostType = require("./post");
 
-const CountryType = new GraphQLObjectType({
-  name: "Country",
-  description: "",
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    capital: { type: GraphQLString }
-  }),
-});
-
-const AuthorType = new GraphQLObjectType({
-  name: "Author",
-  description: "",
-  fields: () => ({
-    id: { type: GraphQLID },
-    name: { type: new GraphQLNonNull(GraphQLString) },
-  }),
-});
-
-const PostType = new GraphQLObjectType({
-  name: "Post",
-  description: "",
-  fields: () => ({
-    id: { type: GraphQLID },
-    title: { type: new GraphQLNonNull(GraphQLString) },
-    author_id: { type: new GraphQLNonNull(GraphQLString) },
-    author: {
-      type: AuthorType,
-      resolve: function(post) {
-        return authors.find(e => e.id === post.author_id)
-      }
-    },
-    body: { type: GraphQLString}
-  }),
-});
-
+const { countries } = require("./data");
 
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
@@ -58,24 +31,33 @@ const RootQuery = new GraphQLObjectType({
     hello: {
       type: GraphQLString,
       description: "",
-      args: { },
+      args: {},
       resolve(parent, args) {
         return "И тебе привет!";
       },
     },
     authors: {
       type: new GraphQLList(AuthorType),
-      description: "",
+      description: "Authors list",
       // args: { },
-      resolve: function() {
-        return [
-          {
-            id: '1',
-            name: "Dmitry"
-          }
-        ]
+      resolve: async function () {
+        let { data } = await axios(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        return data;
       },
-    }
+    },
+    posts: {
+      type: new GraphQLList(PostType),
+      description: "Posts list",
+      args: {},
+      resolve: async function () {
+        let { data } = await axios(
+          "https://jsonplaceholder.typicode.com/posts"
+        );
+        return data;
+      },
+    },
   },
 });
 

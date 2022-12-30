@@ -7,15 +7,13 @@ const {
   GraphQLSchema,
   GraphQLID,
 } = require("graphql");
-
 const _ = require("lodash");
 
 module.exports = new GraphQLObjectType({
-  name: "Country",
+  name: "Author",
   description: "",
   fields: () => ({
     id: { type: GraphQLID },
     name: { type: new GraphQLNonNull(GraphQLString) },
-    capital: { type: GraphQLString },
   }),
 });
